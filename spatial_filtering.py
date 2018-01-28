@@ -3,7 +3,8 @@
 Author: bw
 Jan. 2018"""
 import mne
-from mne import make_lcmv, apply_lcmv_epochs
+import numpy as np
+from mne.beamformer import make_lcmv, apply_lcmv_epochs
 
 
 def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True, pos=10.,
@@ -44,12 +45,12 @@ def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True, pos=10.,
                                                 bem=bem_name,
                                                 subjects_dir=subject)
         else:  # surface grid
-            raise NotImplementedError('Surface grid computation needs to be
-                                      implemented first.')
+            raise NotImplementedError('Surface grid computation needs to be'
+                                      'implemented first.')
         if save_to_disk:
             mne.write_source_spaces(src_fname, src, overwrite=True)
 
-        return fwd
+        return src
 
 
 def compute_forward(info, bem, src, trans_fname, read_from_disk=False,
@@ -83,7 +84,7 @@ def compute_forward(info, bem, src, trans_fname, read_from_disk=False,
     if read_from_disk is True:
         fwd = mne.read_forward_solution(fwd_fname)
     else:
-            fwd = mne.make_forward_solution(epoch.info, trans=trans_fname,
+            fwd = mne.make_forward_solution(info, trans=trans_fname,
                                             src=src, bem=bem, meg=True,
                                             eeg=False, n_jobs=1)
 

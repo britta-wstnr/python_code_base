@@ -4,6 +4,8 @@ Author: bw
 Jan. 2018"""
 import mne
 import numpy as np
+import matplotlib.pyplot as plt
+
 from mne import find_events, Epochs
 from mne.io import Raw
 from bw_helper_functions import check_rank_cov_matrix
@@ -25,8 +27,8 @@ def read_run(raw_fname, run_num):
     return raw
 
 
-def hilbert_epoching(raw, freqs, filt_bandwidth, baseline, t_win, mag=False,
-                     resamp_rate):
+def hilbert_epoching(raw, freqs, filt_transwidth, baseline, t_win, resamp_rate,
+                     mag=False):
     """Get data ready for hilbert beamformer.
 
     Filter, hilbertize, and epoch the data. Returns BP-filtered as well as
@@ -41,16 +43,16 @@ def hilbert_epoching(raw, freqs, filt_bandwidth, baseline, t_win, mag=False,
         raw data of one run.
     freqs : tuple or list (len=2)
         lower and upper limit for BP-filtering.
-    filt_bandwidth : float
+    filt_transwidth : float
         transition bandwidth for FIR filter.
     baseline : tuple (len=2)
         baseline limits.
     t_win : tuple or list (len=2)
         time window for epoching.
-    mag : bool
-        whether only magnetometers should be considered, defaults to False.
     resamp_rate : float
         resampling rate, only hilbertized data will be resampled.
+    mag : bool
+        whether only magnetometers should be considered, defaults to False.
 
     Returns
     -------
@@ -77,8 +79,8 @@ def hilbert_epoching(raw, freqs, filt_bandwidth, baseline, t_win, mag=False,
     # filtering and hilbertizing
     print('Bandpass-filtering and hilbertizing for %i to %i Hz.' % freqs)
 
-    raw.filter(freqs[0], freqs[1], n_jobs=1, l_trans_bandwidth=filt_bandwidth,
-               h_trans_bandwidth=filt_bandwidth, fir_design='firwin')
+    raw.filter(freqs[0], freqs[1], n_jobs=1, l_trans_bandwidth=filt_transwidth,
+               h_trans_bandwidth=filt_transwidth, fir_design='firwin')
 
     raw_hilbert = raw.copy().apply_hilbert(n_jobs=1, envelope=False)
 
@@ -126,7 +128,7 @@ def compute_covariance(epochs, t_win, noise=False, t_win_noise=None,
     noise_cov : MNE CovMat
         noise covariance matrix, returns None if not computed.
     """
-    data_cov = mne.compute_covariance(epochs, tmin=t_win[0], t_win[1])
+    data_cov = mne.compute_covariance(epochs, tmin=t_win[0], tmax=t_win[1])
     if check is True:
         check_rank_cov_matrix(data_cov, epochs)
 

@@ -133,7 +133,7 @@ def compute_covariance(epochs, t_win, noise=False, t_win_noise=None,
         check_rank_cov_matrix(data_cov, epochs)
 
     if noise is True:
-        noise_cov = mne.compute_covaraince(epochs, tmin=t_win_noise[0],
+        noise_cov = mne.compute_covariance(epochs, tmin=t_win_noise[0],
                                            tmax=t_win_noise[1])
         if check is True:
             print('Noise covariance matrix:')
@@ -141,15 +141,16 @@ def compute_covariance(epochs, t_win, noise=False, t_win_noise=None,
 
     # plotting business after info messages
     if plot is True:
-        v_abs = max(abs((data_cov['data'].min(), data_cov['data'].max())))
+        v_abs = max(abs(data_cov['data'].min()),
+                    abs(data_cov['data'].max()))
         plt.imshow(data_cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
         plt.title('Data covariance matrix.')
         plt.colorbar()
         plt.show()
 
         if noise is True:
-            v_abs = max(abs((noise_cov['data'].min(),
-                             noise_cov['data'].max())))
+            v_abs = max(abs(noise_cov['data'].min()),
+                        abs(noise_cov['data'].max()))
             plt.imshow(noise_cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
             plt.title('Noise covariance matrix.')
             plt.colorbar()

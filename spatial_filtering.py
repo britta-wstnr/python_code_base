@@ -2,6 +2,7 @@
 
 Author: bw
 Jan. 2018"""
+import ipdb
 import mne
 import numpy as np
 from mne.beamformer import make_lcmv, apply_lcmv_epochs
@@ -95,7 +96,7 @@ def compute_forward(info, bem, src, trans_fname, read_from_disk=False,
 
 
 def run_lcmv_epochs(epochs, fwd, data_cov, reg, noise_cov=None,
-                    pick_ori='max_power', weight_norm='nai', return_stc=False):
+                    pick_ori='max-power', weight_norm='nai', return_stc=False):
     """Run LCMV on epochs.
 
     Run weight-normalized LCMV beamformer on epoch data, will return matrix of
@@ -134,6 +135,7 @@ def run_lcmv_epochs(epochs, fwd, data_cov, reg, noise_cov=None,
                              max_ori_out='signed')
 
     # get matrix
+    ipdb.set_trace()
     for_stack = []
     for stc in stcs:
         for_stack.append(np.abs(stc.data))

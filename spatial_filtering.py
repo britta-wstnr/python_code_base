@@ -2,7 +2,6 @@
 
 Author: bw
 Jan. 2018"""
-import ipdb
 import mne
 import numpy as np
 from mne.beamformer import make_lcmv, apply_lcmv_epochs
@@ -135,7 +134,6 @@ def run_lcmv_epochs(epochs, fwd, data_cov, reg, noise_cov=None,
                              max_ori_out='signed')
 
     # get matrix
-    ipdb.set_trace()
     for_stack = []
     for stc in stcs:
         for_stack.append(np.abs(stc.data))

@@ -27,6 +27,75 @@ def read_run(raw_fname, run_num):
     return raw
 
 
+def filter_epoching(raw, freqs, filt_transwidth, baseline, t_win,
+                    resamp_rate=None, mag=False):
+    """Filter and epoch data for ERP analysis.
+
+    Filter, epoch and eventually downsample data.
+
+    NOTE: This function has values specific to the experiment hard-coded,
+    adjust before using for something else!!!
+
+    Parameters:
+    -----------
+    raw : Raw
+        raw data of one run.
+    freqs : tuple or list (len=2)
+        lower and upper limit for filtering (successive HP and LP filter)
+    filt_transwidth : tuple or list (len=2)
+        transition bandwidth for FIR filters (HP and LP).
+    baseline : tuple (len=2)
+        baseline limits.
+    t_win : tuple or list (len=2)
+        time window for epoching.
+    resamp_rate : None | float
+        resampling rate, if not None, data will be resampled
+    mag : bool
+        whether only magnetometers should be considered, defaults to False.
+
+    Returns
+    -------
+    events :
+        events used for epoching.
+    epochs_filtered : Epochs
+        filtered epochs
+    """
+    # event business comes first - allows to get rid of stim channel later
+    # TODO: make this smarter and easier to control
+    events = find_events(raw, stim_channel='STI101', shortest_event=1)
+    sel = np.where(events[:, 2] <= 255)[0]
+    events = events[sel, :]
+    # Compensate for delay (as measured manually with photodiode)
+    events[:, 0] += int(.050 * raw.info['sfreq'])
+
+    # pick channels:
+    if mag is True:
+        raw.pick_types(meg='mag', eog=False, stim=False)
+    else:
+        raw.pick_types(meg=True, eog=False, stim=False)
+
+    # filtering
+    (str(kk) for kk in freqs)  # handle the possibility of None type
+    print('Filtering from %s to %s Hz.' % (freqs[0], freqs[1]))
+
+    raw.filter(freqs[0], freqs[1], n_jobs=1,
+               l_trans_bandwidth=filt_transwidth[0],
+               h_trans_bandwidth=filt_transwidth[1],
+               fir_design='firwin')
+
+    # epoching
+    print('Epoching data.')
+    epochs_filtered = Epochs(raw, events, proj=False, tmin=t_win[0],
+                             tmax=t_win[1], baseline=baseline, preload=True)
+    epochs_filtered._raw = None  # memory leakage
+
+    if resamp_rate is not None:
+        print('Resampling data at %i Hz.' % resamp_rate)
+        epochs_filtered.resample(resamp_rate)
+
+    return events, epochs_filtered
+
+
 def hilbert_epoching(raw, freqs, filt_transwidth, baseline, t_win, resamp_rate,
                      mag=False):
     """Get data ready for hilbert beamformer.
@@ -64,6 +133,7 @@ def hilbert_epoching(raw, freqs, filt_transwidth, baseline, t_win, resamp_rate,
         hilbertized epochs, resampled!.
     """
     # event business comes first - allows to get rid of stim channel later
+    # TODO: make this smarter and easier to control
     events = find_events(raw, stim_channel='STI101', shortest_event=1)
     sel = np.where(events[:, 2] <= 255)[0]
     events = events[sel, :]
@@ -77,7 +147,8 @@ def hilbert_epoching(raw, freqs, filt_transwidth, baseline, t_win, resamp_rate,
         raw.pick_types(meg=True, eog=False, stim=False)
 
     # filtering and hilbertizing
-    print('Bandpass-filtering and hilbertizing for %i to %i Hz.' % freqs)
+    print('Bandpass-filtering and hilbertizing for %i to %i Hz.'
+          % (freqs[0], freqs[1]))
 
     raw.filter(freqs[0], freqs[1], n_jobs=1, l_trans_bandwidth=filt_transwidth,
                h_trans_bandwidth=filt_transwidth, fir_design='firwin')

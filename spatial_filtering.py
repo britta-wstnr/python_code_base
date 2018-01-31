@@ -50,7 +50,7 @@ def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True, pos=10.,
         if save_to_disk:
             mne.write_source_spaces(src_fname, src, overwrite=True)
 
-        return src
+    return src
 
 
 def compute_forward(info, bem, src, trans_fname, read_from_disk=False,

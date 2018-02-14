@@ -4,7 +4,7 @@ Author: bw
 Jan. 2018"""
 import mne
 import numpy as np
-from mne.beamformer import make_lcmv, apply_lcmv_epochs
+from mne.beamformer import make_lcmv, apply_lcmv, apply_lcmv_epochs
 
 
 def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True, pos=10.,
@@ -92,6 +92,43 @@ def compute_forward(info, bem, src, trans_fname, read_from_disk=False,
                 mne.write_forward_solution(fwd_fname, fwd, overwrite=True)
 
     return fwd
+
+
+def run_lcmv_evoked(evoked, fwd, data_cov, reg, noise_cov=None,
+                    pick_ori='max-power', weight_norm='nai'):
+    """Run LCMV on average.
+
+    Run weight-normalized LCMV beamformer on evoked data, will return an stc
+    object.
+
+    Parameters:
+    -----------
+    evoked : MNE evoked
+        evoked data to source reconstruct.
+    fwd : MNE forward model
+        forward model.
+    data_cov : MNE covariance estimate
+        data covariance matrix.
+    reg : float
+        regularization parameter
+    noise_cov : MNE covariance estimate
+        noise covariance matrix, optional
+
+    Returns
+    -------
+    stc : MNE stcs
+        original output of apply_lcmv
+    filters : dict
+        spatial filter used in computation
+    """
+    filters = make_lcmv(evoked.info, fwd, data_cov=data_cov,
+                        noise_cov=noise_cov, pick_ori=pick_ori, reg=reg,
+                        weight_norm=weight_norm)
+
+    # apply that filter to epochs
+    stc = apply_lcmv(evoked, filters, max_ori_out='signed')
+
+    return stc, filters
 
 
 def run_lcmv_epochs(epochs, fwd, data_cov, reg, noise_cov=None,

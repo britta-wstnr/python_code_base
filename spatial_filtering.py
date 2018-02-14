@@ -104,7 +104,7 @@ def run_lcmv_epochs(epochs, fwd, data_cov, reg, noise_cov=None,
     Parameters:
     -----------
     epochs : MNE epochs
-        epochs to compute the covariance matrices on.
+        epochs to source reconstruct.
     fwd : MNE forward model
         forward model.
     data_cov : MNE covariance estimate

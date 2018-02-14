@@ -9,6 +9,7 @@ from mne.decoding import SlidingEstimator, cross_val_multiscore, LinearModel
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.cross_decomposition import CCA
 
 
 def sliding_logreg_source(X, y, cross_val):
@@ -28,3 +29,28 @@ def sliding_logreg_source(X, y, cross_val):
           % (endt - startt))
 
     return score
+
+
+def cca_covariance_matrices(x_cov, y_cov, n_comp=None):
+    """Use CCA to align covariance matrices from different runs.
+
+    Get a transform matrix to align covariance matrices with each other.
+
+    Parameters:
+    ----------
+    x_cov : array
+        covariance matrix that should be aligned
+    y_cov : array
+        covariance matrix that is used for alignment
+    n_comp : int | None
+        number of components
+    """
+    if n_comp is not None:
+        tfm_model = CCA(n_components=n_comp)
+    else:
+        tfm_model = CCA(n_components=len(x_cov))
+        # TODO: maybe rank is better
+
+    x_al, y_al = tfm_model.fit(x_cov, y_cov).transform(x_cov)
+
+    return x_al, y_al

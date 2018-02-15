@@ -212,15 +212,15 @@ def compute_covariance(epochs, t_win, noise=False, t_win_noise=None,
 
     # plotting business after info messages
     if plot is True:
-        v_abs = max(abs(data_cov['data'].min()),
-                    abs(data_cov['data'].max()))
+        # center the x limits wrt the smaller extreme (minimum or maximum)
+        v_abs = min(abs(data_cov['data'].min()), abs(data_cov['data'].max()))
         plt.imshow(data_cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
         plt.title('Data covariance matrix.')
         plt.colorbar()
         plt.show()
 
         if noise is True:
-            v_abs = max(abs(noise_cov['data'].min()),
+            v_abs = min(abs(noise_cov['data'].min()),
                         abs(noise_cov['data'].max()))
             plt.imshow(noise_cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
             plt.title('Noise covariance matrix.')

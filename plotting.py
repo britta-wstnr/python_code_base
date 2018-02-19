@@ -8,6 +8,7 @@ from mne import save_stc_as_volume
 from nilearn.plotting import plot_stat_map
 from nilearn.image import index_img
 
+
 def plot_score_std(x_ax, score, title):
 
     plt.plot(x_ax, score.mean(0), color='steelblue')
@@ -135,3 +136,45 @@ def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None):
         plt.ylim(ylims)
     plt.title(title)
     plt.show()
+
+
+def plot_covariance(cov, title=None, colorbar=True, show_fig=True,
+                    save_fig=False, fig_fname=None):
+    """Plot covariance matrix.
+
+    Plots covariance matrices.
+
+    Parameters:
+    -----------
+    cov : covariance matrix
+        MNE-Python covaraince matrix instance.
+    title : str
+        Title for plot.
+    colorbar : bool
+        Should color bar be added? Defaults to True.
+    show_fig :  bool
+        Whether figure should be displayed.
+    save_fig : bool
+        Whether figure should be saved to disk.
+    fig_fname : str
+        Path for saving figure if save_fig=True.
+    """
+
+    # center the x limits wrt the smaller extreme (minimum or maximum)
+    v_abs = min(abs(cov['data'].min()), abs(cov['data'].max()))
+
+    # plotting
+    fig = plt.imshow(cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
+    plt.title(title)
+    if colorbar:
+        plt.colorbar()
+
+    # show figure if applicable
+    if show_fig:
+        plt.show()
+
+    # saving
+    if save_fig:
+        if fig_fname is None:
+            raise ValueError("Please give a figure name to save to.")
+        fig.savefig(fig_fname, bbox_inches='tight')

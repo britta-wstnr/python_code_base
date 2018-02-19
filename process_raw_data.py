@@ -189,8 +189,6 @@ def compute_covariance(epochs, t_win, noise=False, t_win_noise=None,
         time window to compute noise covariance matrix on.
     check : bool
         whether the covariance matrices' goodness should be checked.
-    plot : bool
-        whether the covariance matrices should be plotted.
 
     Returns
     -------
@@ -210,25 +208,49 @@ def compute_covariance(epochs, t_win, noise=False, t_win_noise=None,
             print('Noise covariance matrix:')
             check_rank_cov_matrix(noise_cov, epochs)
 
-    # plotting business after info messages
-    if plot is True:
-        # center the x limits wrt the smaller extreme (minimum or maximum)
-        v_abs = min(abs(data_cov['data'].min()), abs(data_cov['data'].max()))
-        plt.imshow(data_cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
-        plt.title('Data covariance matrix.')
-        plt.colorbar()
-        plt.show()
-
-        if noise is True:
-            v_abs = min(abs(noise_cov['data'].min()),
-                        abs(noise_cov['data'].max()))
-            plt.imshow(noise_cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
-            plt.title('Noise covariance matrix.')
-            plt.colorbar()
-            plt.show()
-
     # return whatever needs to be returned
     if noise is True:
         return data_cov, noise_cov
     else:
         return data_cov, None
+
+def plot_covariance(cov, title=None, colorbar=True, show_fig=True,
+                    save_fig=False, fig_fname=None):
+    """Plot covariance matrix.
+
+    Plots covariance matrices.
+
+    Parameters:
+    -----------
+    cov : covariance matrix
+        MNE-Python covaraince matrix instance.
+    title : str
+        Title for plot.
+    colorbar : bool
+        Should color bar be added? Defaults to True.
+    show_fig :  bool
+        Whether figure should be displayed.
+    save_fig : bool
+        Whether figure should be saved to disk.
+    fig_fname : str
+        Path for saving figure if save_fig=True.
+    """
+
+    # center the x limits wrt the smaller extreme (minimum or maximum)
+    v_abs = min(abs(cov['data'].min()), abs(cov['data'].max()))
+
+    # plotting
+    fig = plt.imshow(cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
+    plt.title(title)
+    if colorbar:
+        plt.colorbar()
+
+    # show figure if applicable
+    if show_fig:
+        plt.show()
+
+    # saving
+    if save_fig:
+        if fig_fname is None:
+            raise ValueError("Please give a figure name to save to.")
+        fig.savefig(fig_fname, bbox_inches='tight')

@@ -84,14 +84,14 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
             _, m_tp = np.unravel_index(stc.data.argmax(), stc.data.shape)
         threshold = np.max(stc.data[:, m_tp]) * threshold
 
-    fig = plot_stat_map(index_img(img, timepoint), bg_img=mri,
-                        threshold=threshold, title=title)
-
     if save_to_disk:
         if fig_fname is None:
             raise ValueError("Please specify a file name to save figure to.")
-
-        fig.savefig(fig_fname)
+        plot_stat_map(index_img(img, timepoint), bg_img=mri,
+                      threshold=threshold, title=title, output_file=fig_fname)
+    else:
+        plot_stat_map(index_img(img, timepoint), bg_img=mri,
+                      threshold=threshold, title=title)
 
 
 def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None):
@@ -155,7 +155,8 @@ def plot_covariance(cov, title=None, colorbar=True, show_fig=True,
     show_fig :  bool
         Whether figure should be displayed.
     save_fig : bool
-        Whether figure should be saved to disk.
+        Whether figure should be saved to disk. Note that the figure will not
+        be shown in this case (nilearn properties).
     fig_fname : str
         Path for saving figure if save_fig=True.
     """

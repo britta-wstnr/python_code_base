@@ -1,6 +1,6 @@
 """Assorted plotting functions.
 
-Jan. 2018
+Jan.-Feb.  2018
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,7 +32,7 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
 
     Plots source activity on subject's MRI.
     NOTE: the function needs to save a .nii.gz file during for plotting. This
-    file is saved into the current directiory as "tmp.nii.gz".
+    file is saved into the current directory as "tmp.nii.gz".
 
     Parameters:
     -----------
@@ -175,6 +175,7 @@ def plot_covariance(cov, title=None, colorbar=True, show_fig=True,
     v_abs = min(abs(cov['data'].min()), abs(cov['data'].max()))
 
     # plotting
+    plt.figure()
     plt.imshow(cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
     plt.title(title)
     if colorbar:

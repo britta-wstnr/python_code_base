@@ -164,17 +164,17 @@ def plot_covariance(cov, title=None, colorbar=True, show_fig=True,
     v_abs = min(abs(cov['data'].min()), abs(cov['data'].max()))
 
     # plotting
-    fig = plt.imshow(cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
+    plt.imshow(cov.data, vmin=-v_abs, vmax=v_abs, cmap='RdBu')
     plt.title(title)
     if colorbar:
         plt.colorbar()
 
     # show figure if applicable
-    if show_fig:
+    if show_fig is True:
         plt.show()
 
     # saving
     if save_fig:
         if fig_fname is None:
             raise ValueError("Please give a figure name to save to.")
-        fig.savefig(fig_fname, bbox_inches='tight')
+        plt.savefig(fig_fname, bbox_inches='tight')

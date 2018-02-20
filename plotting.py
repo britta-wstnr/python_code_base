@@ -26,7 +26,7 @@ def plot_score_std(x_ax, score, title):
 
 
 def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
-                    title=None, timepoint=None, save_to_disk=False,
+                    title=None, timepoint=None, save_fig=False,
                     fig_fname=None):
     """Plot source activity on volume.
 
@@ -55,7 +55,7 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
     timepoint : float | string
         Time point that should be plotted. Can be given as float or can be
         'max' to select the time point with maximal activity.
-    save_to_disk : bool
+    save_fig : bool
         whether the figure should be saved
     fig_fname : string
         where to save the figure to
@@ -84,7 +84,7 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
             _, m_tp = np.unravel_index(stc.data.argmax(), stc.data.shape)
         threshold = np.max(stc.data[:, m_tp]) * threshold
 
-    if save_to_disk:
+    if save_fig:
         if fig_fname is None:
             raise ValueError("Please specify a file name to save figure to.")
         plot_stat_map(index_img(img, timepoint), bg_img=mri,
@@ -94,7 +94,8 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
                       threshold=threshold, title=title)
 
 
-def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None):
+def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None,
+                   save_fig=False, fig_fname=None):
     """Plot source time series.
 
     Plots the n maximal time series in source space data.
@@ -113,6 +114,11 @@ def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None):
         y axis limits for figure.
     title : string | None
         Title for  the figure.
+    save_fig : bool
+        Whether figure should be saved to disk. Note that the figure will not
+        be shown in this case (nilearn properties).
+    fig_fname : str
+        Path for saving figure if save_fig=True.
 
     Returns
     -------
@@ -137,6 +143,11 @@ def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None):
     plt.title(title)
     plt.show()
 
+    if save_fig is True:
+        if fig_fname is None:
+            raise ValueError("Please give a figure name to save to.")
+        plt.savefig(fig_fname, bbox_inches='tight')
+
 
 def plot_covariance(cov, title=None, colorbar=True, show_fig=True,
                     save_fig=False, fig_fname=None):
@@ -160,7 +171,6 @@ def plot_covariance(cov, title=None, colorbar=True, show_fig=True,
     fig_fname : str
         Path for saving figure if save_fig=True.
     """
-
     # center the x limits wrt the smaller extreme (minimum or maximum)
     v_abs = min(abs(cov['data'].min()), abs(cov['data'].max()))
 

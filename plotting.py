@@ -138,6 +138,8 @@ def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None,
     plt.ylabel('LCMV value [a.u.]')
     if xlims is not None:
         plt.xlim(xlims)
+    else:
+        plt.xlim(stc.times.min(), stc.times.max())
     if ylims is not None:
         plt.ylim(ylims)
     plt.title(title)

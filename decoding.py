@@ -4,7 +4,8 @@ Author: bw
 Jan. 2018"""
 import time
 
-from mne.decoding import SlidingEstimator, cross_val_multiscore, LinearModel
+from mne.decoding import (SlidingEstimator, cross_val_multiscore, LinearModel,
+                          get_coef)
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
@@ -12,7 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cross_decomposition import CCA
 
 
-def sliding_logreg_source(X, y, cross_val):
+def sliding_logreg_source(X, y, cross_val, return_clf=False):
     """Run a sliding estimator with Logistic Regression on source data.
     """
     startt = time.time()
@@ -28,7 +29,20 @@ def sliding_logreg_source(X, y, cross_val):
     print('Done. Time elapsed for sliding estimator: %i seconds.'
           % (endt - startt))
 
-    return score
+    if return_clf is True:
+        return score, clf
+    else:
+        return score
+
+
+def get_pattern(X, y, clf, time_point):
+    """Get pattern from classifier on X and y at peak time.
+    """
+    X_tp = X[:, :, time_point]
+    clf.fit(X_tp, y)
+    pattern = get_coef(clf, 'patterns_', inverse_transform=True)
+
+    return pattern
 
 
 def cca_covariance_matrices(x_cov, y_cov, n_comp=None):

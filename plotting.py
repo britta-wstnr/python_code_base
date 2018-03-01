@@ -9,25 +9,33 @@ from nilearn.plotting import plot_stat_map
 from nilearn.image import index_img
 
 
-def plot_score_std(x_ax, score, title):
+def plot_score_std(x_ax, scores, title=None, colors=None, legend=None):
 
-    plt.plot(x_ax, score.mean(0), color='steelblue')
-    ax = plt.gca()
-    ax.fill_between(x_ax,
-                    score.mean(0) - np.std(score),
-                    score.mean(0) + np.std(score),
-                    alpha=.4, color='steelblue')
+    if colors is None:
+        colors = ['mediumseagreen', 'crimson', 'steelblue']
+        if len(scores) > 3:
+            raise ValueError("Please specify colors for plotting.")
+
+    for ii, score in enumerate(scores):
+        plt.plot(x_ax, score.mean(0), color=colors[ii])
+        ax = plt.gca()
+        ax.fill_between(x_ax,
+                        score.mean(0) - np.std(score),
+                        score.mean(0) + np.std(score),
+                        alpha=.4, color=colors[ii])
+
     plt.axvline(x=0., color='black')
     plt.ylabel('AUC')
     plt.xlim(x_ax[0], x_ax[-1])
     plt.xlabel('time')
     plt.title(title)
-    plt.show()
+    if legend is not None:
+        plt.legend(legend)
 
 
 def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
                     title=None, timepoint=None, save_fig=False,
-                    fig_fname=None):
+                    fig_fname=None, cmap=None):
     """Plot source activity on volume.
 
     Plots source activity on subject's MRI.
@@ -48,17 +56,22 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
         used, if None, no thresholding is done.
     thresh_ref : string
         Reference for thresholding. Can be 'all' to use maximum across time and
-        space or 'max_time' to use maximum time point or 'time' to refer to the
-        time point given in timepoint.
+        space or 'max_time' to use maximum time point or 'timepoint' to refer
+        to the time point given in timepoint.
     title : string | None
         Title for the figure.
     timepoint : float | string
-        Time point that should be plotted. Can be given as float or can be
-        'max' to select the time point with maximal activity.
+        Time point that should be plotted. Can be given as index (int) or can
+        be 'max' to select the time point with maximal activity.
     save_fig : bool
         whether the figure should be saved
     fig_fname : string
         where to save the figure to
+    cmap : None | string
+        Matplotlib color map for plotting, passed to nilearn's plot_stat_map.
+        Popular choices might be  "viridis" or "RdBu". From the nilearn doc:
+        The colormap must be symmetric. If None, the default color map will be
+        used."
 
     Returns
     -------
@@ -83,15 +96,18 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
             # in that case, maximum time point needs to be calculated now:
             _, m_tp = np.unravel_index(stc.data.argmax(), stc.data.shape)
         threshold = np.max(stc.data[:, m_tp]) * threshold
+    elif thresh_ref is 'timepoint':
+        threshold = np.max(stc.data[:, timepoint] * threshold)
 
-    if save_fig:
+    if save_fig is True:
         if fig_fname is None:
             raise ValueError("Please specify a file name to save figure to.")
         plot_stat_map(index_img(img, timepoint), bg_img=mri,
-                      threshold=threshold, title=title, output_file=fig_fname)
+                      threshold=threshold, title=title, output_file=fig_fname,
+                      cmap=cmap)
     else:
         plot_stat_map(index_img(img, timepoint), bg_img=mri,
-                      threshold=threshold, title=title)
+                      threshold=threshold, title=title, cmap=cmap)
 
 
 def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None,

@@ -37,11 +37,29 @@ def sliding_logreg_source(X, y, cross_val, return_clf=False):
 
 def get_pattern(X, y, clf, time_point):
     """Get pattern from classifier on X and y at peak time.
+
+    Re-fit the classifier without cross-validation and get the patterns/
+    coefficients.
+
+    Parameters:
+    -----------
+    X : array
+        The data to fit (features).
+    y : vector
+        The response vector.
+    clf : sklearn classifier object
+        The classifier to re-fit.
+    time-point : float | None
+        If data is more than two dimensional: which time-point to fit.
+
+    Returns:
+    --------
+    pattern : array
+        The sensor or source pattern of coefficients.
     """
     X_tp = X[:, :, time_point]
     clf.fit(X_tp, y)
     pattern = get_coef(clf, 'patterns_', inverse_transform=True)
-
     return pattern
 
 

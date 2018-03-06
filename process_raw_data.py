@@ -213,3 +213,14 @@ def compute_covariance(epochs, t_win, noise=False, t_win_noise=None,
         return data_cov, noise_cov
     else:
         return data_cov, None
+
+
+def compute_snr(evoked, t_baseline, t_signal, label):
+    bl = evoked.time_as_index(t_baseline)
+    sig = evoked.time_as_index(t_signal)
+
+    rms_bl = np.sqrt(np.mean(evoked.data[label, bl[0]:bl[1]] ** 2))
+    rms_sig = np.sqrt(np.mean(evoked.data[label, sig[0]:sig[1]] ** 2))
+
+    snr = ((rms_sig - rms_bl) / rms_bl)
+    return snr

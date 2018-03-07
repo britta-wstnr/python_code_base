@@ -15,6 +15,24 @@ from sklearn.cross_decomposition import CCA
 
 def sliding_logreg_source(X, y, cross_val, return_clf=False):
     """Run a sliding estimator with Logistic Regression on source data.
+
+    Parameters:
+    -----------
+    X : np.array
+        features.
+    y : vector
+        response vector.
+    cross_val : cross validation object
+        cross validation to adopt.
+    return_clf : bool
+        whether the clf object should be returned as well.
+
+    Returns
+    -------
+    score : float
+        cross-validated AUC score
+    clf : classifier object
+        If return_clf == True, the classifier object will be returned, too.
     """
     startt = time.time()
 

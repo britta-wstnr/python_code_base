@@ -1,7 +1,7 @@
 """Functions related to processing of sensor space data.
 
 Author: bw
-Jan. 2018"""
+Jan. 2018 - Mar. 2018"""
 import mne
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,7 +14,19 @@ from bw_helper_functions import check_rank_cov_matrix
 def read_run(raw_fname, run_num):
     """Read data from run run_num from disk.
 
-    Reads both maxfiltered and raw data."""
+    Reads both maxfiltered and raw data.
+
+    Parameters:
+    -----------
+    raw_fname : string
+        path to the raw file with place holder for the run number
+    run_num : int
+        run number to be filled into the path
+
+    Returns
+    -------
+    raw : Raw object
+    """
     if '-sss.fif' in raw_fname:
         # maxfiltered data:
         run_fname = raw_fname.format(str(run_num))
@@ -216,6 +228,27 @@ def compute_covariance(epochs, t_win, noise=False, t_win_noise=None,
 
 
 def compute_snr(evoked, t_baseline, t_signal, label):
+    """Computes the signal-to-noise ratio on an evoked signal.
+
+    Computes the signal-to-noise ratio (SNR) on an evoked signal, using the
+    root-mean-square.
+
+    Parameters:
+    -----------
+    evoked : evoked
+        evoked data to compute SNR on
+    t_baseline : tuple or list
+        time window to use as noise.
+    t_signal : tuple or list
+        time window to use as signal.
+    label : list of integers
+        the channels to include in the computation.
+
+    Returns
+    -------
+    snr : float
+        signal-to-noise ratio
+    """
     bl = evoked.time_as_index(t_baseline)
     sig = evoked.time_as_index(t_signal)
 

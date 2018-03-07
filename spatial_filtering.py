@@ -1,7 +1,7 @@
 """Functions to prepare and run beamformers.
 
 Author: bw
-Jan. 2018"""
+Jan. 2018 - Mar. 2018"""
 import mne
 import numpy as np
 from mne.beamformer import make_lcmv, apply_lcmv, apply_lcmv_epochs

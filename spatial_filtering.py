@@ -7,8 +7,9 @@ import numpy as np
 from mne.beamformer import make_lcmv, apply_lcmv, apply_lcmv_epochs
 
 
-def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True, pos=10.,
-                 read_from_disk=False, src_fname=None, save_to_disk=False):
+def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True,
+                 spacing=10., read_from_disk=False, src_fname=None,
+                 save_to_disk=False):
     """Compute source grid (src).
 
     Reads or computes source space or surface grid.
@@ -23,8 +24,10 @@ def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True, pos=10.,
         path to MRI, needed for source space model.
     volume_grid : bool
         whether volume source model should be computed.
-    pos : float
-        source spacing for volume grid, defaults to 10 mmm.
+    spacing : float
+        source spacing for volume grid or surface grid, defaults to 10 mmm for
+        volume source space and "oct6" for surface space. Needs to be float
+        for volume source spaces and string for surface spaces.
     read_from_disk : bool
         if True, read pre-computed grid from disk.
     src_fname : path
@@ -41,12 +44,23 @@ def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True, pos=10.,
         src = mne.read_source_spaces(src_fname)
     else:
         if volume_grid:
-            src = mne.setup_volume_source_space(pos=pos, mri=t1_fname,
+            if spacing is None:
+                spacing = 10.
+            elif isinstance(spacing, float) is not True:
+                raise ValueError("spacing needs to be given as a float for "
+                                 "volume source models.")
+            src = mne.setup_volume_source_space(pos=spacing, mri=t1_fname,
                                                 bem=bem_name,
                                                 subjects_dir=subject)
         else:  # surface grid
-            raise NotImplementedError('Surface grid computation needs to be'
-                                      'implemented first.')
+            if spacing is None:
+                spacing = "oct6"
+            elif isinstance(spacing, str) is not True:
+                raise ValueError("spacing needs to be given as a string for "
+                                 "surface source models.")
+
+            src = mne.setup_source_space(subject, spacing=spacing,
+                                         subjects_dir=subject, add_dist=False)
         if save_to_disk:
             mne.write_source_spaces(src_fname, src, overwrite=True)
 

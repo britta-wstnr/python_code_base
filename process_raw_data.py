@@ -4,11 +4,10 @@ Author: bw
 Jan. 2018 - Mar. 2018"""
 import mne
 import numpy as np
-import matplotlib.pyplot as plt
 
 from mne import find_events, Epochs
 from mne.io import Raw
-from bw_helper_functions import check_rank_cov_matrix
+from helper_functions import check_rank_cov_matrix
 
 
 def read_run(raw_fname, run_num):

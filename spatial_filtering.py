@@ -7,9 +7,9 @@ import numpy as np
 from mne.beamformer import make_lcmv, apply_lcmv, apply_lcmv_epochs
 
 
-def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True,
-                 spacing=10., read_from_disk=False, src_fname=None,
-                 save_to_disk=False):
+def compute_grid(subject, subjects_dir, bem_name, t1_fname=None,
+                 volume_grid=True, spacing=None, read_from_disk=False,
+                 src_fname=None, save_to_disk=False):
     """Compute source grid (src).
 
     Reads or computes source space or surface grid.
@@ -18,16 +18,18 @@ def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True,
     -----------
     subject : string
         subject name.
+    subjects_dir : string | None
+        subject directory, can be None if same as subject.
     bem_name : path
         path to BEM model.
     t1_fname : path
         path to MRI, needed for source space model.
     volume_grid : bool
         whether volume source model should be computed.
-    spacing : float
+    spacing : float | string | None
         source spacing for volume grid or surface grid, defaults to 10 mmm for
-        volume source space and "oct6" for surface space. Needs to be float
-        for volume source spaces and string for surface spaces.
+        volume source space and "oct6" for surface space if set to None. Needs
+        to be float for volume source spaces and string for surface spaces.
     read_from_disk : bool
         if True, read pre-computed grid from disk.
     src_fname : path
@@ -40,6 +42,9 @@ def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True,
     src : dict
         MNE source model.
     """
+    if subjects_dir is None:
+        subjects_dir = subject
+
     if read_from_disk is True:
         src = mne.read_source_spaces(src_fname)
     else:
@@ -51,7 +56,7 @@ def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True,
                                  "volume source models.")
             src = mne.setup_volume_source_space(pos=spacing, mri=t1_fname,
                                                 bem=bem_name,
-                                                subjects_dir=subject)
+                                                subjects_dir=subjects_dir)
         else:  # surface grid
             if spacing is None:
                 spacing = "oct6"
@@ -60,7 +65,8 @@ def compute_grid(subject, bem_name, t1_fname=None, volume_grid=True,
                                  "surface source models.")
 
             src = mne.setup_source_space(subject, spacing=spacing,
-                                         subjects_dir=subject, add_dist=False)
+                                         subjects_dir=subjects_dir,
+                                         add_dist=False)
         if save_to_disk:
             mne.write_source_spaces(src_fname, src, overwrite=True)
 

@@ -1,8 +1,9 @@
-""" Preliminary way of storing various functions re Decoding project.
-
-Should eventually be organized better.
+""" Assorted little helper functions.
 
 Jan. 2018
+
+AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
+LICENCE: BSD 3-clause
 """
 from mne.utils import estimate_rank
 from numpy.linalg import cond

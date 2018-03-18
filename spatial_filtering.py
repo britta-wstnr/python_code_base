@@ -1,7 +1,10 @@
 """Functions to prepare and run beamformers.
 
-Author: bw
-Jan. 2018 - Mar. 2018"""
+Jan. - Mar. 2018
+
+AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
+LICENCE: BSD 3-clause
+"""
 import mne
 import numpy as np
 from mne.beamformer import make_lcmv, apply_lcmv, apply_lcmv_epochs

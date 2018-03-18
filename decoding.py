@@ -1,7 +1,10 @@
-"""Functions related to decoding in sensor space
+"""Functions related to decoding
 
-Author: bw
-Jan. 2018"""
+Jan. 2018
+
+AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
+LICENCE: BSD 3-clause
+"""
 import time
 
 from mne.decoding import (SlidingEstimator, cross_val_multiscore, LinearModel,

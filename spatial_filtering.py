@@ -155,7 +155,7 @@ def run_lcmv_evoked(evoked, fwd, data_cov, reg, noise_cov=None,
 
 
 def run_lcmv_epochs(epochs, fwd, data_cov, reg, noise_cov=None,
-                    pick_ori='max-power', weight_norm='nai', return_stc=False):
+                    pick_ori='max-power', weight_norm='nai', verbose=False):
     """Run LCMV on epochs.
 
     Run weight-normalized LCMV beamformer on epoch data, will return matrix of
@@ -173,34 +173,38 @@ def run_lcmv_epochs(epochs, fwd, data_cov, reg, noise_cov=None,
         regularization parameter
     noise_cov : MNE covariance estimate
         noise covariance matrix, optional
-    return_stc : bool
-        whether the stcs list should be returned in addition to the matrix.
+    verbose : bool
+        overrides default verbose level, defaults to False, i.e., no logger
+        info.
 
     Returns
     -------
     stcs_mat : numpy array
         matrix with all source trials
+    stc : MNE stc
+        single trial stc object (last trial)
     filters : dict
         spatial filter used in computation
-    stcs : list of MNE stcs
-        original output of apply_lcmv_epochs, None if return_stc=False
     """
     filters = make_lcmv(epochs.info, fwd, data_cov=data_cov,
                         noise_cov=noise_cov, pick_ori=pick_ori, reg=reg,
-                        weight_norm=weight_norm)
+                        weight_norm=weight_norm, verbose=verbose)
 
     # apply that filter to epochs
-    stcs = apply_lcmv_epochs(epochs, filters, return_generator=False,
-                             max_ori_out='signed')
+    stcs = apply_lcmv_epochs(epochs, filters, return_generator=True,
+                             max_ori_out='signed', verbose=verbose)
 
-    # get matrix
-    for_stack = []
-    for stc in stcs:
-        for_stack.append(np.abs(stc.data))
+    # preallocate matrix
+    stcs_mat = np.ones((epochs._data.shape[0], fwd['nsource'],
+                        len(epochs.times)))
 
-    stcs_mat = np.stack(for_stack, axis=0)
+    # resolve generator
+    for trial in range(epochs._data.shape[0]):
+        # last time: also save stc
+        if trial == len(epochs._data.shape[0] - 1):
+            stc = next(stcs)
+            stcs_mat[trial, :, :] = stc.data
+        else:
+            stcs_mat[trial, :, :] = next(stcs).data
 
-    if return_stc is True:
-        return stcs_mat, filters, stcs
-    else:
-        return stcs_mat, filters, None
+    return stcs_mat, stc, filters

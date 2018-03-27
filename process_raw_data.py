@@ -226,7 +226,7 @@ def compute_covariance(epochs, t_win, noise=False, t_win_noise=None,
     if noise is True:
         return data_cov, noise_cov
     else:
-        return data_cov, None
+        return data_cov
 
 
 def compute_snr(evoked, t_baseline, t_signal, label):

@@ -198,10 +198,13 @@ def run_lcmv_epochs(epochs, fwd, data_cov, reg, noise_cov=None,
     stcs_mat = np.ones((epochs._data.shape[0], fwd['nsource'],
                         len(epochs.times)))
 
+    if verbose is False:
+        mne.set_log_level('WARNING')
+
     # resolve generator
     for trial in range(epochs._data.shape[0]):
         # last time: also save stc
-        if trial == len(epochs._data.shape[0] - 1):
+        if trial == 0:
             stc = next(stcs)
             stcs_mat[trial, :, :] = stc.data
         else:

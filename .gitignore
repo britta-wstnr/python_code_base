@@ -1,0 +1,13 @@
+# ignore compiled files
+*.pyc
+*.py~
+
+# ignore ipython notebook checkpoints
+*.ipynb_checkpoints
+
+# ignore emacs stuff
+\#*#
+*~
+
+# specific files
+simulations.py  

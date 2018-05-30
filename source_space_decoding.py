@@ -56,7 +56,7 @@ def sliding_logreg_source(X, y, cross_val, return_clf=False):
         return score
 
 
-def get_pattern(X, y, clf, time_point):
+def get_pattern(X, y, clf, time_point=None):
     """Get pattern from classifier on X and y at peak time.
 
     Re-fit the classifier without cross-validation and get the patterns/
@@ -78,9 +78,16 @@ def get_pattern(X, y, clf, time_point):
     pattern : array
         The sensor or source pattern of coefficients.
     """
-    X_tp = X[:, :, time_point]
-    clf.fit(X_tp, y)
-    pattern = get_coef(clf, 'patterns_', inverse_transform=True)
+    if time_point is not None:
+        X = X[:, :, time_point]
+
+    clf.fit(X, y)
+
+    if clf.steps[-1][0] == 'logisticregression':
+        pattern = get_coef(clf, 'coef_', inverse_transform=True)
+    else:
+        pattern = get_coef(clf, 'patterns_', inverse_transform=True)
+
     return pattern
 
 

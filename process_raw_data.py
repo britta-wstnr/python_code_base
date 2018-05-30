@@ -213,6 +213,7 @@ def compute_covariance(epochs, t_win, noise=False, t_win_noise=None,
     """
     data_cov = mne.compute_covariance(epochs, tmin=t_win[0], tmax=t_win[1])
     if check is True:
+        print('Data covariance matrix:')
         check_rank_cov_matrix(data_cov, epochs)
 
     if noise is True:

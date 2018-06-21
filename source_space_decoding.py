@@ -6,7 +6,6 @@ AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com
 LICENCE: BSD 3-clause
 """
 import time
-
 from mne.decoding import (SlidingEstimator, cross_val_multiscore, LinearModel,
                           get_coef)
 
@@ -84,7 +83,7 @@ def get_pattern(X, y, clf, time_point=None):
     clf.fit(X, y)
 
     if clf.steps[-1][0] == 'logisticregression':
-        pattern = get_coef(clf, 'coef_', inverse_transform=True)
+        pattern = get_coef(clf, 'coefs_', inverse_transform=True)
     else:
         pattern = get_coef(clf, 'patterns_', inverse_transform=True)
 

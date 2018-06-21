@@ -38,7 +38,7 @@ def plot_score_std(x_ax, scores, title=None, colors=None, legend=None):
 
 def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
                     title=None, timepoint=None, save_fig=False,
-                    fig_fname=None, cmap=None):
+                    fig_fname=None, cmap=None, vmax=None):
     """Plot source activity on volume.
 
     Plots source activity on subject's MRI.
@@ -75,6 +75,8 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
         Popular choices might be  "viridis" or "RdBu". From the nilearn doc:
         The colormap must be symmetric. If None, the default color map will be
         used."
+    vmax : None | float
+        Upper (and -lower) limit of the color bar.
 
     Returns
     -------
@@ -110,7 +112,8 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
                       cmap=cmap)
     else:
         plot_stat_map(index_img(img, timepoint), bg_img=mri,
-                      threshold=threshold, title=title, cmap=cmap)
+                      threshold=threshold, title=title, cmap=cmap,
+                      symmetric_cbar=True, vmax=vmax)
 
 
 def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None,

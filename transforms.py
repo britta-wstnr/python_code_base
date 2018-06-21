@@ -29,7 +29,7 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
         epochs = mne.EpochsArray(X, self.info, verbose=False)
         self.data_cov, self.noise_cov = compute_covariance(
             epochs, t_win=self.t_win, noise=True,
-            t_win_noise=self.t_win_noise, check=True, plot=False)
+            t_win_noise=self.t_win_noise, check=False, plot=False)
         self.filters = make_lcmv(self.info, self.fwd, self.data_cov,
                                  noise_cov=self.noise_cov,
                                  pick_ori=self.pick_ori,

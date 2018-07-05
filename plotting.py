@@ -7,7 +7,6 @@ LICENCE: BSD 3-clause
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from mne import save_stc_as_volume
 from nilearn.plotting import plot_stat_map
 from nilearn.image import index_img
 
@@ -82,9 +81,7 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
     -------
     nilearn figure.
     """
-    nii_save_name = 'tmp.nii.gz'
-    img = save_stc_as_volume(nii_save_name, stc, fwd['src'],
-                             mri_resolution=False)
+    img = stc.as_volume(fwd['src'], mri_resolution=False)
 
     if timepoint is 'max':
         vox, timepoint = np.unravel_index(stc.data.argmax(), stc.data.shape)

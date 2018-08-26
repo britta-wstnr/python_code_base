@@ -1,7 +1,5 @@
 """Functions to prepare and run beamformers.
 
-Jan. - Mar. 2018
-
 AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
 LICENCE: BSD 3-clause
 """

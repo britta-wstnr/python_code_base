@@ -1,7 +1,5 @@
 """Functions related to processing of sensor space data.
 
-Jan. - Mar. 2018
-
 AUTHOR: Britta U. Westner
 LICENCE: BSD 3-clause
 """

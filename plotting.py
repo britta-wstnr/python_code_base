@@ -41,8 +41,6 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
     """Plot source activity on volume.
 
     Plots source activity on subject's MRI.
-    NOTE: the function needs to save a .nii.gz file during for plotting. This
-    file is saved into the current directory as "tmp.nii.gz".
 
     Parameters:
     -----------

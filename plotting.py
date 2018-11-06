@@ -35,7 +35,7 @@ def plot_score_std(x_ax, scores, title=None, colors=None, legend=None):
 
 def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
                     title=None, timepoint=None, save_fig=False,
-                    fig_fname=None, cmap=None, vmax=None):
+                    fig_fname=None, cmap=None, vmax=None, coords=None):
     """Plot source activity on volume.
 
     Plots source activity on subject's MRI.
@@ -72,6 +72,8 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
         used."
     vmax : None | float
         Upper (and -lower) limit of the color bar.
+    coords : None | tuple
+        If not None, a marker will be plotted at the specified coordinates.
 
     Returns
     -------
@@ -83,7 +85,7 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
         vox, timepoint = np.unravel_index(stc.data.argmax(), stc.data.shape)
 
     if mri is None:
-        mri = False  # this plots no brain at all
+        mri = False  # this plots no brain  TODO: this is broken in nilearn
     elif mri is "mni":
         mri = None  # this hopefully plots the MNI brain
 
@@ -103,9 +105,15 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
     else:
         fig_fname = None
 
-    plot_stat_map(index_img(img, timepoint), bg_img=mri,
-                  threshold=threshold, title=title, cmap=cmap,
-                  symmetric_cbar=True, vmax=vmax, output_file=fig_fname)
+    display = plot_stat_map(index_img(img, timepoint), bg_img=mri,
+                            threshold=threshold, title=title, cmap=cmap,
+                            symmetric_cbar=True, vmax=vmax,
+                            output_file=fig_fname, cut_coords=coords,
+                            display_mode='ortho')
+
+    if coords is not None:
+        # add a marker
+        display.add_markers([coords], marker_color='w', marker_size=100)
 
 
 def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None,

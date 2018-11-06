@@ -100,13 +100,12 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
     if save_fig is True:
         if fig_fname is None:
             raise ValueError("Please specify a file name to save figure to.")
-        plot_stat_map(index_img(img, timepoint), bg_img=mri,
-                      threshold=threshold, title=title, output_file=fig_fname,
-                      cmap=cmap)
     else:
-        plot_stat_map(index_img(img, timepoint), bg_img=mri,
-                      threshold=threshold, title=title, cmap=cmap,
-                      symmetric_cbar=True, vmax=vmax)
+        fig_fname = None
+
+    plot_stat_map(index_img(img, timepoint), bg_img=mri,
+                  threshold=threshold, title=title, cmap=cmap,
+                  symmetric_cbar=True, vmax=vmax, output_file=fig_fname)
 
 
 def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None,

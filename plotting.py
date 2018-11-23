@@ -35,7 +35,8 @@ def plot_score_std(x_ax, scores, title=None, colors=None, legend=None):
 
 def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
                     title=None, timepoint=None, save_fig=False,
-                    fig_fname=None, cmap=None, vmax=None, coords=None):
+                    fig_fname=None, cmap=None, vmax=None, coords=None,
+                    add_coords=False):
     """Plot source activity on volume.
 
     Plots source activity on subject's MRI.
@@ -47,8 +48,8 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
     fwd : forward operator
         MNE forward model
     mri : string | None
-        Can be path to a specific subject's brain or "mni" to plot on the MNI
-        brain or False for not having any background image.
+        Can be path to a specific subject's brain or None for not having
+        any background image.
     threshold : float | 'auto' | None
         Threshold for plotting, if 'auto', nilearn's automatic threshold is
         used, if None, no thresholding is done.
@@ -74,20 +75,18 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
         Upper (and -lower) limit of the color bar.
     coords : None | tuple
         If not None, a marker will be plotted at the specified coordinates.
+    add_coords : bool
+        If True, a marker will be displayed at the coordinates provided in
+        coords.
 
     Returns
     -------
     nilearn figure.
     """
-    img = stc.as_volume(fwd['src'], mri_resolution=False)
+    img = stc.as_volume(fwd['src'], mri_resolution=True)
 
     if timepoint is 'max':
         vox, timepoint = np.unravel_index(stc.data.argmax(), stc.data.shape)
-
-    if mri is None:
-        mri = False  # this plots no brain  TODO: this is broken in nilearn
-    elif mri is "mni":
-        mri = None  # this hopefully plots the MNI brain
 
     if thresh_ref is 'all':
         threshold = np.max(stc.data) * threshold
@@ -111,9 +110,11 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
                             output_file=fig_fname, cut_coords=coords,
                             display_mode='ortho')
 
-    if coords is not None:
+    if add_coords is not True:
+        if coords is None:
+            raise ValueError("Please provide coords for adding a marker.")
         # add a marker
-        display.add_markers([coords], marker_color='w', marker_size=100)
+        display.add_markers([coords], marker_color='w', marker_size=50)
 
 
 def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None,

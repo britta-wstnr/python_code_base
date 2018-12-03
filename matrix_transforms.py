@@ -4,7 +4,9 @@ import numpy as np
 
 def stc_2_niivol(coords_in, fwd, mri_mgz):
     """Convert stc coordinates to match nilearn plotting on nifti MRI."""
-    # head to mri surface (nifti)
+    # convert to mm
+    coords_in = deepcopy(coords_in)
+    coords_in *= 1000
 
     # MEG headspace to RAS surface
     ras2meg = deepcopy(fwd['mri_head_t']['trans'])

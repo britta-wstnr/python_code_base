@@ -73,8 +73,8 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
         used."
     vmax : None | float
         Upper (and -lower) limit of the color bar.
-    coords : None | tuple
-        If not None, a marker will be plotted at the specified coordinates.
+    coords : None | list of tuples
+        Coordinates to cut and/or plot a marker at (see add_coords).
     add_coords : bool
         If True, a marker will be displayed at the coordinates provided in
         coords.
@@ -101,20 +101,25 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
     if save_fig is True:
         if fig_fname is None:
             raise ValueError("Please specify a file name to save figure to.")
+        if add_coords is True:
+            raise NotImplementedError("Cannot plot markers and save yet, "
+                                      "sorry.")
     else:
         fig_fname = None
 
     display = plot_stat_map(index_img(img, timepoint), bg_img=mri,
                             threshold=threshold, title=title, cmap=cmap,
                             symmetric_cbar=True, vmax=vmax,
-                            output_file=fig_fname, cut_coords=coords,
+                            output_file=fig_fname, cut_coords=coords[0],
                             display_mode='ortho')
 
-    if add_coords is not True:
+    if add_coords is True:
         if coords is None:
             raise ValueError("Please provide coords for adding a marker.")
         # add a marker
-        display.add_markers([coords], marker_color='w', marker_size=50)
+        colors = ['w', 'y', 'b']
+        for coord, color in zip(coords, colors):
+            display.add_markers([coord], marker_color=color, marker_size=50)
 
 
 def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None,

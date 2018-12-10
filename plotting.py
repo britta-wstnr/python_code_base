@@ -35,8 +35,8 @@ def plot_score_std(x_ax, scores, title=None, colors=None, legend=None):
 
 def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
                     title=None, timepoint=None, save_fig=False,
-                    fig_fname=None, cmap=None, vmax=None, coords=None,
-                    add_coords=False):
+                    fig_fname=None, cmap=None, vmax=None, display_mode='ortho',
+                    coords=None, add_coords=False):
     """Plot source activity on volume.
 
     Plots source activity on subject's MRI.
@@ -73,6 +73,8 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
         used."
     vmax : None | float
         Upper (and -lower) limit of the color bar.
+    display_mode : string
+        Display mode. See nilearn for details. Defaults to 'ortho'.
     coords : None | list of tuples
         Coordinates to cut and/or plot a marker at (see add_coords).
     add_coords : bool
@@ -83,7 +85,7 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
     -------
     nilearn figure.
     """
-    img = stc.as_volume(fwd['src'], mri_resolution=True)
+    img = stc.as_volume(fwd['src'], mri_resolution=False)
 
     if timepoint is 'max':
         vox, timepoint = np.unravel_index(stc.data.argmax(), stc.data.shape)
@@ -107,17 +109,36 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
     else:
         fig_fname = None
 
+    if type(coords) is not list:
+        coords = [coords]
+
+    if display_mode is 'z':
+        # only take the z coordinate
+        cut_coords = tuple([x[2] for x in coords])
+        display_mode = 'ortho'  # default
+    elif display_mode is 'ortho':
+        # only one cut coordinate supported
+        cut_coords = coords[0]
+    else:
+        raise NotImplementedError("Requested display mode is not "
+                                  "supported yet.")
+
     display = plot_stat_map(index_img(img, timepoint), bg_img=mri,
                             threshold=threshold, title=title, cmap=cmap,
                             symmetric_cbar=True, vmax=vmax,
-                            output_file=fig_fname, cut_coords=coords[0],
-                            display_mode='ortho')
+                            output_file=fig_fname, cut_coords=cut_coords,
+                            display_mode=display_mode)
 
     if add_coords is True:
         if coords is None:
             raise ValueError("Please provide coords for adding a marker.")
         # add a marker
-        colors = ['w', 'y', 'b']
+        colors = ['w', 'y', 'r', 'k', 'b']
+        if len(coords) > len(colors):
+            raise ValueError("Can maximally plot 5 coordinates.")
+        else:
+            colors = colors[:len(coords) - 1]
+
         for coord, color in zip(coords, colors):
             display.add_markers([coord], marker_color=color, marker_size=50)
 

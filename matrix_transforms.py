@@ -25,6 +25,16 @@ def stc_2_niivol(coords_in, fwd, mri_mgz):
 
 
 def transform_coords(coords_in, tfm):
+    """Affine coordinate transformations."""
     coords_out = np.dot(tfm[0:3, 0:3], coords_in.T) + tfm[0:3, 3]
+
+    return coords_out
+
+
+def get_coord_from_peak(stc, fwd):
+    """Get the right coordinates belonging to an stc peak."""
+    peak_idx = stc.get_peak(mode='pos', vert_as_index=True)
+    peak_vert = stc.vertices[peak_idx[0]]
+    coords_out = fwd['src'][0]['rr'][peak_vert, ]
 
     return coords_out

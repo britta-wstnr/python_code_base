@@ -2,8 +2,8 @@ from copy import deepcopy
 import numpy as np
 
 
-def stc_2_niivol(coords_in, fwd, mri_mgz):
-    """Convert stc coordinates to match nilearn plotting on nifti MRI."""
+def stc_2_mgzvol(coords_in, fwd, mri_mgz):
+    """Convert stc coordinates to match nilearn plotting on mgz MRI."""
     # convert to mm
     coords_in = deepcopy(coords_in)
     coords_in *= 1000
@@ -13,7 +13,7 @@ def stc_2_niivol(coords_in, fwd, mri_mgz):
     ras2meg[0:3, 3] *= 1000.
     coords_ras = transform_coords(coords_in, np.linalg.inv(ras2meg))
 
-    # RAS sruface to mgz voxel space
+    # RAS surface to mgz voxel space
     vox2ras = mri_mgz.header.get_vox2ras_tkr()
     coords_mgz = transform_coords(coords_ras, np.linalg.inv(vox2ras))
 

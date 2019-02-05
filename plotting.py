@@ -115,7 +115,6 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
     if display_mode is 'z':
         # only take the z coordinate
         cut_coords = tuple([x[2] for x in coords])
-        display_mode = 'ortho'  # default
     elif display_mode is 'ortho':
         # only one cut coordinate supported
         cut_coords = coords[0]
@@ -133,14 +132,15 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
         if coords is None:
             raise ValueError("Please provide coords for adding a marker.")
         # add a marker
-        colors = ['w', 'y', 'r', 'k', 'b']
+        colors = ['w', 'y', 'g', 'k', 'b']
         if len(coords) > len(colors):
             raise ValueError("Can maximally plot 5 coordinates.")
         else:
-            colors = colors[:len(coords) - 1]
+            colors = colors[:len(coords)]
 
         for coord, color in zip(coords, colors):
             display.add_markers([coord], marker_color=color, marker_size=50)
+            plt.show()
 
 
 def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None,

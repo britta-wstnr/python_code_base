@@ -3,7 +3,7 @@
 AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
 LICENCE: BSD 3-clause
 """
-from mne.utils import estimate_rank
+from mne.rank import estimate_rank
 from numpy.linalg import cond
 from decimal import Decimal
 

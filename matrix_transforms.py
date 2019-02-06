@@ -38,3 +38,14 @@ def get_coord_from_peak(stc, fwd):
     coords_out = fwd['src'][0]['rr'][peak_vert, ]
 
     return coords_out
+
+
+def get_distance(p1, p2):
+    """Get the distance between two points in 3D space."""
+    p1 = np.array(p1)
+    p2 = np.array(p2)
+
+    distance = np.sum((p1-p2)**2)
+    distance = np.sqrt(distance)
+
+    return distance

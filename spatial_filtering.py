@@ -6,6 +6,7 @@ LICENCE: BSD 3-clause
 import mne
 import numpy as np
 from mne.beamformer import make_lcmv, apply_lcmv, apply_lcmv_epochs
+from matrix_transforms import get_coord_from_peak, get_distance
 
 
 def compute_grid(subject, subjects_dir, bem_name, t1_fname=None,
@@ -209,3 +210,44 @@ def run_lcmv_epochs(epochs, fwd, data_cov, reg, noise_cov=None,
             stcs_mat[trial, :, :] = next(stcs).data
 
     return stcs_mat, stc, filters
+
+
+def compute_activity_spread(stc, fwd, thresh=0.8):
+    """Compute a weighted spread index for source activity.
+
+    Compute an index for the spread of source activity, weighted by the
+    distance of voxels to the maximum of the source. Only considers activity
+    at the timepoint of the maximum.
+
+    Parameters:
+    -----------
+    stc : MNE source object
+        source to compute index on.
+    fwd : MNE forward model
+        forward model.
+    thresh : float
+        the threshold for voxels to consider (% of maximum activity).
+
+    Returns
+    -------
+    index : float
+        the computed weighted spread index.
+    """
+    max_val = stc.data.max()
+    vox, time_point = np.unravel_index(stc.data.argmax(), stc.data.shape)
+    max_coord = get_coord_from_peak(stc, fwd)
+    cut_val = max_val * thresh
+    voxels = np.where(stc.data[:, time_point] >= cut_val)
+
+    spread = 0.
+    for vox_ii in voxels:
+        if vox_ii == vox:
+            spread = spread + 1.
+        else:
+            coord = fwd['src'][0]['rr'][stc.vertices[vox_ii], ]
+            dist = get_distance(max_coord, coord)
+            weighted_dist = 1. / (dist * 1000)  # convert in mm
+            weighted_act = stc.data[vox_ii, time_point] / max_val
+            spread = spread + weighted_dist * weighted_act
+
+    return spread

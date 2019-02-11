@@ -140,7 +140,7 @@ def plot_source_act(stc, fwd, mri=None, threshold=None, thresh_ref=None,
 
         for coord, color in zip(coords, colors):
             display.add_markers([coord], marker_color=color, marker_size=50)
-            plt.show()
+            # plt.show()
 
 
 def plot_source_ts(stc, n_ts, abs=True, xlims=None, ylims=None, title=None,

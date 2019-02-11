@@ -212,7 +212,7 @@ def run_lcmv_epochs(epochs, fwd, data_cov, reg, noise_cov=None,
     return stcs_mat, stc, filters
 
 
-def compute_activity_spread(stc, fwd, thresh=0.8):
+def compute_activity_spread(stc, fwd, threshold=0.8):
     """Compute a weighted spread index for source activity.
 
     Compute an index for the spread of source activity, weighted by the
@@ -225,7 +225,7 @@ def compute_activity_spread(stc, fwd, thresh=0.8):
         source to compute index on.
     fwd : MNE forward model
         forward model.
-    thresh : float
+    threshold : float
         the threshold for voxels to consider (% of maximum activity).
 
     Returns
@@ -236,18 +236,18 @@ def compute_activity_spread(stc, fwd, thresh=0.8):
     max_val = stc.data.max()
     vox, time_point = np.unravel_index(stc.data.argmax(), stc.data.shape)
     max_coord = get_coord_from_peak(stc, fwd)
-    cut_val = max_val * thresh
+    cut_val = max_val * threshold
     voxels = np.where(stc.data[:, time_point] >= cut_val)
 
     spread = 0.
-    for vox_ii in voxels:
+    for vox_ii in voxels[0]:
         if vox_ii == vox:
             spread = spread + 1.
         else:
             coord = fwd['src'][0]['rr'][stc.vertices[vox_ii], ]
             dist = get_distance(max_coord, coord)
             weighted_dist = 1. / (dist * 1000)  # convert in mm
-            weighted_act = stc.data[vox_ii, time_point] / max_val
-            spread = spread + weighted_dist * weighted_act
+            # weighted_act = stc.data[vox_ii, time_point] / max_val
+            spread = spread + weighted_dist * weighted_dist
 
     return spread

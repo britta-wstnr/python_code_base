@@ -10,7 +10,7 @@ def stc_2_mgzvol(coords_in, fwd, mri_mgz):
 
     # MEG headspace to RAS surface
     ras2meg = deepcopy(fwd['mri_head_t']['trans'])
-    ras2meg[0:3, 3] *= 1000.
+
     coords_ras = transform_coords(coords_in, np.linalg.inv(ras2meg))
 
     # RAS surface to mgz voxel space
@@ -21,6 +21,26 @@ def stc_2_mgzvol(coords_in, fwd, mri_mgz):
     mgz2mri = mri_mgz.header.get_affine()
     coords_out = transform_coords(coords_mgz, mgz2mri)
 
+    return coords_out
+
+
+def mgzvol_2_stc(coords_in, fwd, mri_mgz):
+    # assumes mm
+    coords_in = deepcopy(coords_in)
+
+    # transforms
+    ras2meg = deepcopy(fwd['mri_head_t']['trans'])
+    ras2meg[0:3, 3] *= 1000.
+    vox2ras = mri_mgz.header.get_vox2ras_tkr()
+    mgz2mri = mri_mgz.header.get_affine()
+
+    # world space to mgz voxel space
+    coords_mgz = transform_coords(coords_in, np.linalg.inv(mgz2mri))
+
+    coords_ras = transform_coords(coords_mgz, vox2ras)
+
+    coords_out = transform_coords(coords_ras, ras2meg)
+    coords_out /= 1000
     return coords_out
 
 

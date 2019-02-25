@@ -10,6 +10,7 @@ def stc_2_mgzvol(coords_in, fwd, mri_mgz):
 
     # MEG headspace to RAS surface
     ras2meg = deepcopy(fwd['mri_head_t']['trans'])
+    ras2meg[0:3, 3] *= 1000.
 
     coords_ras = transform_coords(coords_in, np.linalg.inv(ras2meg))
 
@@ -40,7 +41,7 @@ def mgzvol_2_stc(coords_in, fwd, mri_mgz):
     coords_ras = transform_coords(coords_mgz, vox2ras)
 
     coords_out = transform_coords(coords_ras, ras2meg)
-    coords_out /= 1000
+    coords_out /= 1000.
     return coords_out
 
 
@@ -69,3 +70,40 @@ def get_distance(p1, p2):
     distance = np.sqrt(distance)
 
     return distance
+
+
+def get_headtransform(lpa, rpa, nas):
+    # assumes elekta system
+    # adpated from the FieldTrip toolbox
+    dir_z = np.cross(rpa - lpa, nas - lpa)
+    dir_x = rpa - lpa
+    dir_y = np.cross(dir_z, dir_x)
+    dir_x = dir_x / np.linalg.norm(dir_x)
+    dir_y = dir_y / np.linalg.norm(dir_y)
+    dir_z = dir_z / np.linalg.norm(dir_z)
+    dirs = np.array((dir_x, dir_y, dir_z))
+
+    origin = lpa + np.dot(np.dot(nas - lpa, dir_x), dir_x)
+
+    rotation = np.eye(4)
+    tmp = np.eye(3).dot(np.linalg.inv(dirs))
+    rotation[0:3, 0:3] = np.linalg.inv(tmp)
+
+    tra = np.eye(4)
+    tra[0:4, 3] = np.append(origin, 1.)
+
+    tfm = np.dot(rotation, tra)
+    return tfm
+
+
+def get_fids_from_raw(raw):
+    for row in raw.info['dig']:
+        if row['kind'] == 1:
+            if row['ident'] == 1:
+                lpa_meg = row['r']
+            elif row['ident'] == 2:
+                nas_meg = row['r']
+            elif row['ident'] == 3:
+                rpa_meg = row['r']
+    fids = {'lpa' : lpa_meg, 'rpa' : rpa_meg, 'nas' : nas_meg}
+    return fids

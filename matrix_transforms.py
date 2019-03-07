@@ -1,3 +1,7 @@
+""" Coordinate system business: tranformations
+
+AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
+"""
 from copy import deepcopy
 import numpy as np
 

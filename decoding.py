@@ -1,7 +1,6 @@
 """Functions related to decoding
 
 AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
-LICENCE: BSD 3-clause
 """
 import time
 

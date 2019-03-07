@@ -1,7 +1,6 @@
 """ Assorted little helper functions.
 
 AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
-LICENCE: BSD 3-clause
 """
 from mne.rank import estimate_rank
 from numpy.linalg import cond

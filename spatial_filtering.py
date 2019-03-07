@@ -1,7 +1,6 @@
 """Functions to prepare and run beamformers.
 
 AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
-LICENCE: BSD 3-clause
 """
 import mne
 import numpy as np

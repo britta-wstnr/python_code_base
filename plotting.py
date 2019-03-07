@@ -1,7 +1,6 @@
 """Assorted plotting functions.
 
 AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
-LICENCE: BSD 3-clause
 """
 import numpy as np
 import matplotlib.pyplot as plt

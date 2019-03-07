@@ -1,7 +1,6 @@
 """Functions related to processing of sensor space data.
 
 AUTHOR: Britta U. Westner
-LICENCE: BSD 3-clause
 """
 import mne
 import numpy as np

@@ -1,7 +1,6 @@
 """Functions related to decoding in source space
 
 AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com
-LICENCE: BSD 3-clause
 """
 import time
 from mne.decoding import (SlidingEstimator, cross_val_multiscore, LinearModel,

@@ -5,12 +5,14 @@ AUTHOR: Britta U. Westner <britta.wstnr[at]gmail.com>
 import mne
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
+from signal_processing import get_max_diff
 
 
 class lcmvEpochs(TransformerMixin, BaseEstimator):
     def __init__(self, info, fwd, t_win, t_win_noise, reg,
                  pick_ori='max-power',
-                 weight_norm='nai'):
+                 weight_norm='nai',
+                 returns='power'):
         self.info = info
         self.fwd = fwd
         self.t_win = t_win
@@ -18,6 +20,7 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
         self.reg = reg
         self.pick_ori = pick_ori
         self.weight_norm = weight_norm
+        self.returns = returns
 
     def fit(self, X, y):
         from mne.beamformer import make_lcmv
@@ -34,7 +37,7 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
 
         return self
 
-    def transform(self, X):
+    def transform(self, X, y):
         from mne.beamformer import apply_lcmv_epochs
         mne.set_log_level('WARNING')
         epochs = mne.EpochsArray(X, self.info, verbose=False)
@@ -46,7 +49,14 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
         for trial in range(X.shape[0]):
             stcs_mat[trial, :, :] = next(stcs).data
 
-        return np.mean(np.abs(stcs_mat), axis=2)
+        # stcs_mat is [trials, grid points, time points]
+        if self.returns == 'power':
+            return np.mean((stcs_mat ** 2), axis=2)
+        elif self.returns == 'diff_max':
+            ev = np.mean(stcs_mat[np.where(y == 0.)], axis=0)
+            ev2 = np.mean(stcs_mat[np.where(y == 1.)], axis=0)
+            _, _, max_tp = get_max_diff(ev, ev2, use_abs=True)
+            return stcs_mat[:, :, max_tp]
 
     def fit_transform(self, X, y):
-        return self.fit(X, y).transform(X)
+        return self.fit(X, y).transform(X, y)

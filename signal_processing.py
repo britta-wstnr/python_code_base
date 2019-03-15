@@ -34,7 +34,7 @@ def get_max_diff(evoked, evoked2=None, use_abs=False):
     if evoked2 is None:
         if type(evoked) is not list:
             raise ValueError("If evoked is not a list (got type %s), evoked2 "
-                             "needs to be specified.")
+                             "needs to be specified." % type(evoked))
         evoked1 = _check_type_evoked(evoked[0])
         evoked2 = _check_type_evoked(evoked[1])
     else:

@@ -10,7 +10,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 class lcmvEpochs(TransformerMixin, BaseEstimator):
     def __init__(self, info, fwd, t_win, t_win_noise, reg,
                  pick_ori='max-power',
-                 weight_norm='nai'):
+                 weight_norm='nai',
+                 erp=False, time_idx=None):
         self.info = info
         self.fwd = fwd
         self.t_win = t_win
@@ -18,6 +19,8 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
         self.reg = reg
         self.pick_ori = pick_ori
         self.weight_norm = weight_norm
+        self.erp = erp
+        self.time_idx = time_idx
 
     def fit(self, X, y):
         from mne.beamformer import make_lcmv
@@ -34,7 +37,7 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
 
         return self
 
-    def transform(self, X, **transform_params):
+    def transform(self, X):
         from mne.beamformer import apply_lcmv_epochs
         mne.set_log_level('WARNING')
         epochs = mne.EpochsArray(X, self.info, verbose=False)
@@ -47,7 +50,10 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
             stcs_mat[trial, :, :] = next(stcs).data
 
         # stcs_mat is [trials, grid points, time points]
-        return np.mean((stcs_mat ** 2), axis=2)
+        if self.erp is False:
+            return np.mean((stcs_mat ** 2), axis=2)
+        else:
+            return np.squeeze(stcs_mat[:, :, self.time_idx])
 
     def fit_transform(self, X, y):
         return self.fit(X, y).transform(X)

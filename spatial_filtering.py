@@ -250,3 +250,32 @@ def compute_activity_spread(stc, fwd, threshold=0.8):
             spread = spread + weighted_dist * weighted_dist
 
     return spread
+
+
+def source2epoch(stcs_mat, grid_num, sfreq):
+    """Transform source data matrix to EpochArray ("virtual channels").
+
+    Use source space (or other) data that are present as a matrix and build a
+    Epoch object from that to enable all epoch-based processing.
+
+    Parameters:
+    -----------
+    stcs_mat : matrix
+        data matrix with dimensions [trials, grid points, time points]
+    grid_num : int
+        number of grid points
+    sfreq : float
+        sampling frequency
+
+    Returns:
+    --------
+    epochs : mne.EpochsArray object
+        the data wrapped in an epochs object
+    """
+    ch_names = [str(x) for x in range(grid_num)]
+    ch_types = ['mag'] * grid_num
+
+    info = mne.create_info(ch_names=ch_names, ch_types=ch_types, sfreq=sfreq)
+    epochs = mne.EpochsArray(stcs_mat, info, tmin=0., verbose=False)
+
+    return epochs

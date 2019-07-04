@@ -55,7 +55,7 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
         # stcs_mat is [trials, grid points, time points]
         if self.erp is False:
             time_idx = epochs.time_as_index(0.8)
-            return np.mean((stcs_mat[:, :, :time_idx] ** 2), axis=2)
+            return np.mean((stcs_mat[:, :, 0:time_idx[0]] ** 2), axis=2)
         else:
             return np.squeeze(stcs_mat[:, :, self.time_idx])
 

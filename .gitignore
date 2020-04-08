@@ -10,4 +10,5 @@
 *~
 
 # specific files
-simulations.py  
+simulations.py
+generate_data.py

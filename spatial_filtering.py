@@ -232,22 +232,22 @@ def compute_activity_spread(stc, fwd, threshold=0.8):
     index : float
         the computed weighted spread index.
     """
-    max_val = stc.data.max()
-    vox, time_point = np.unravel_index(stc.data.argmax(), stc.data.shape)
+    max_val = np.abs(stc.data).max()
+    max_vox, time_point = np.unravel_index(stc.data.argmax(), stc.data.shape)
     max_coord = get_coord_from_peak(stc, fwd)
     cut_val = max_val * threshold
     voxels = np.where(stc.data[:, time_point] >= cut_val)
 
     spread = 0.
     for vox_ii in voxels[0]:
-        if vox_ii == vox:
+        if vox_ii == max_vox:
             spread = spread + 1.
         else:
-            coord = fwd['src'][0]['rr'][stc.vertices[vox_ii], ]
+            coord = fwd['src'][0]['rr'][stc.vertices[0][vox_ii], ]
             dist = get_distance(max_coord, coord)
-            weighted_dist = 1. / (dist * 1000)  # convert in mm
+            inv_dist = 1. / (dist * 1000)  # convert in mm
             # weighted_act = stc.data[vox_ii, time_point] / max_val
-            spread = spread + weighted_dist * weighted_dist
+            spread = spread + inv_dist
 
     return spread
 

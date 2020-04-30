@@ -56,10 +56,10 @@ def transform_coords(coords_in, tfm):
     return coords_out
 
 
-def get_coord_from_peak(stc, fwd):
+def get_coord_from_peak(stc, fwd, peak_mode='abs'):
     """Get the right coordinates belonging to an stc peak."""
-    peak_idx = stc.get_peak(mode='pos', vert_as_index=True)
-    peak_vert = stc.vertices[peak_idx[0]]
+    peak_idx = stc.get_peak(mode=peak_mode, vert_as_index=True)
+    peak_vert = stc.vertices[0][peak_idx[0]]
     coords_out = fwd['src'][0]['rr'][peak_vert, ]
 
     return coords_out

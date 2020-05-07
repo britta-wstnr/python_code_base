@@ -13,7 +13,7 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
     def __init__(self, info, fwd, t_win, t_win_noise, tmin, reg,
                  pick_ori='max-power',
                  weight_norm='nai',
-                 erp=False, time_idx=None):
+                 erp=False, time_idx=None, power_win=(0, 0.8)):
         self.info = info
         self.fwd = fwd
         self.t_win = t_win
@@ -24,6 +24,7 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
         self.weight_norm = weight_norm
         self.erp = erp
         self.time_idx = time_idx
+        self.power_win = power_win
 
     def fit(self, X, y):
         from mne.beamformer import make_lcmv
@@ -54,8 +55,10 @@ class lcmvEpochs(TransformerMixin, BaseEstimator):
 
         # stcs_mat is [trials, grid points, time points]
         if self.erp is False:
-            time_idx = epochs.time_as_index(0.8)
-            return np.mean((stcs_mat[:, :, 0:time_idx[0]] ** 2), axis=2)
+            time_idx_a = epochs.time_as_index(self.power_win[0])
+            time_idx_b = epochs.time_as_index(self.power_win[1])
+            return np.mean((stcs_mat[:, :, time_idx_a[0]:time_idx_b[0]] ** 2),
+                           axis=2)
         else:
             return np.squeeze(stcs_mat[:, :, self.time_idx])
 

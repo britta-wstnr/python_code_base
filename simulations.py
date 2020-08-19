@@ -25,7 +25,7 @@ def generate_signal(times, freq, n_trial=1, phase_lock=False):
     signal = np.zeros_like(times)
 
     for trial in range(n_trial):
-        envelope = np.exp(50. * -(times - 0.5 - trial) ** 2.)
+        envelope = np.exp(1000. * -(times - 0.5 - trial) ** 2.)
         if phase_lock is False:
             phase = np.random.rand() * 2 * np.pi
             signal += np.cos(phase + freq * 2 * np.pi * times) * envelope

@@ -5,6 +5,7 @@ Credit: parts of the functions are inspired by:
 https://github.com/kingjr/jr-tools
 """
 import numpy as np
+import pandas as pd
 
 from mne.forward import apply_forward
 from mne.simulation import simulate_sparse_stc
@@ -116,14 +117,18 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
         if snr == 0.0:
             raise ValueError('You asked me to divide by 0. Please change '
                              'snr parameter.')
-        # Brownian noise:
-        white_noise = np.random.randn(*evoked.data.shape)
 
         if noise_type == "white":
+            white_noise = np.random.randn(*evoked.data.shape)
             evoked.data += (white_noise / snr)
         elif noise_type == "brownian":
+            white_noise = np.random.randn(*evoked.data.shape)
             brownian_noise = np.cumsum(white_noise / snr, axis=1)
             evoked.data += brownian_noise
+        elif noise_type == "pink":
+            pink_noise = make_pink_noise(evoked.data.shape[1], 10,
+                                         evoked.data.shape[0])
+            evoked.data += (pink_noise / snr)
         else:
             raise ValueError('So far, only white and brownian noise is '
                              'implemented, got %s' % noise_type)
@@ -155,3 +160,48 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
 
     else:
         return evoked, stc
+
+
+def make_pink_noise(noise_samples, n_changes, n_sensors):
+    """Generate pink noise following the Voss algorithm.
+
+    This function simulates pink (1/f) noise following the algorithm by
+    Voss & Clarke (1978), J Acoust Soc.
+    The implementation follows a blog post by Allen Downey
+    https://www.dsprelated.com/showarticle/908.php
+
+    Parameters:
+    -----------
+    noise_samples : int
+        number of samples to put out (length of signal)
+    n_changes : int
+        How often the random source changes. The bigger the number, the more
+        low frequency content is in the signal.
+    n_sensors : int
+        How many different noise signals should be generated (i.e. how many
+        sensors). This will correspond to the rows of the output.
+
+    Returns:
+    --------
+    noise_signal : array
+        Pink noise of the dimensions sensors x samples.
+    """
+
+    noise_signal = np.empty((n_sensors, noise_samples))
+
+    for ii, sig in enumerate(noise_signal):
+        array = np.empty((noise_samples, n_changes))
+        array.fill(np.nan)
+        array[0, :] = np.random.random(n_changes)
+        array[:, 0] = np.random.random(noise_samples)
+
+        cols = np.random.geometric(0.5, noise_samples)
+        cols[cols >= n_changes] = 0
+        rows = np.random.randint(noise_samples, size=noise_samples)
+        array[rows, cols] = np.random.random(noise_samples)
+
+        df = pd.DataFrame(array)
+        df.fillna(method='ffill', axis=0, inplace=True)
+        noise_signal[ii, :] = df.sum(axis=1)
+
+    return noise_signal

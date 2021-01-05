@@ -113,34 +113,50 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
     # take care of SNR:
     evoked.data /= np.std(evoked.data)
 
-    if snr is not None:
-        if snr == 0.0:
-            raise ValueError('You asked me to divide by 0. Please change '
-                             'snr parameter.')
-
-        if noise_type == "white":
-            white_noise = np.random.randn(*evoked.data.shape)
-            evoked.data += (white_noise / snr)
-        elif noise_type == "brownian":
-            white_noise = np.random.randn(*evoked.data.shape)
-            brownian_noise = np.cumsum(white_noise / snr, axis=1)
-            evoked.data += brownian_noise
-        elif noise_type == "pink":
-            pink_noise = make_pink_noise(evoked.data.shape[1], 10,
-                                         evoked.data.shape[0])
-            evoked.data += (pink_noise / snr)
-        else:
-            raise ValueError('So far, only white and brownian noise is '
-                             'implemented, got %s' % noise_type)
-
-        # evoked.data *= 1e-12
-
     if filtering is not None:
         if "lp_tw" not in filtering:
             filtering["lp_tw"] = "auto"
         if "hp_tw" not in filtering:
             filtering["hp_tw"] = "auto"
 
+    if snr is not None:
+        if snr == 0.0:
+            raise ValueError('You asked me to divide by 0. Please change '
+                             'snr parameter.')
+
+        if noise_type == "white":
+            noise_data = np.random.randn(*evoked.data.shape)
+        elif noise_type == "brownian":
+            # make white noise first
+            noise_data = np.random.randn(*evoked.data.shape)
+        elif noise_type == "pink":
+            noise_data = make_pink_noise(evoked.data.shape[1], 10,
+                                         evoked.data.shape[0])
+        else:
+            raise ValueError('So far, only white, brownian, and pink noise is '
+                             'implemented, got %s' % noise_type)
+
+        if filtering is not None:
+            # filter the noise in the same range as data
+            noise_evoked = evoked.copy()
+            noise_evoked.data[:] = noise_data
+            noise_evoked.filter(filtering["hp"], filtering["lp"],
+                                fir_design=filtering["fir_design"],
+                                l_trans_bandwidth=filtering["hp_tw"],
+                                h_trans_bandwidth=filtering["lp_tw"],
+                                verbose=False)
+            noise_data = noise_evoked.data
+
+        if noise_type == 'brownian':
+            noise_data = np.cumsum(noise_evoked.data / snr, axis=1)
+            evoked.data += noise_data
+        else:
+            evoked.data += (noise_data / snr)
+
+    # evoked.data *= 1e-12
+
+    if filtering is not None:
+        # filter all the data again
         evoked.filter(filtering["hp"], filtering["lp"],
                       fir_design=filtering["fir_design"],
                       l_trans_bandwidth=filtering["hp_tw"],

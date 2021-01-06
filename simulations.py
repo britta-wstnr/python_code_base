@@ -67,7 +67,8 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
         Seed for the time series simulation, only relevant for location in
         label.
     snr : None | float
-        If not None, signal-to-noise ratio for resulting signal (adding noise).
+        If not None, signal-to-noise ratio in dB for resulting signal (adding
+        noise).
     noise_type : str
         Type of noise. Supported is at the moment: "white" and "brownian".
     return_matrix : bool
@@ -114,9 +115,6 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
     if picks is not None:
         evoked.pick_types(meg=picks)
 
-    # take care of SNR:
-    evoked.data /= np.std(evoked.data)
-
     if filtering is not None:
         if "lp_tw" not in filtering:
             filtering["lp_tw"] = "auto"
@@ -124,10 +122,7 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
             filtering["hp_tw"] = "auto"
 
     if snr is not None:
-        if snr == 0.0:
-            raise ValueError('You asked me to divide by 0. Please change '
-                             'snr parameter.')
-
+        snr = 10 ** (snr/20)  # convert dB to ratio
         if noise_type == "white":
             noise_data = np.random.randn(*evoked.data.shape)
         elif noise_type == "brownian":
@@ -141,7 +136,7 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
                              'implemented, got %s' % noise_type)
 
         if filtering is not None:
-            # filter the noise in the same range as data
+            # filter the noise
             noise_evoked = evoked.copy()
             noise_evoked.data[:] = noise_data
             noise_evoked.filter(filtering["hp"], filtering["lp"],
@@ -151,13 +146,23 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
                                 verbose=False)
             noise_data = noise_evoked.data
 
-        if noise_type == 'brownian':
-            noise_data = np.cumsum(noise_evoked.data / snr, axis=1)
-            evoked.data += noise_data
-        else:
-            evoked.data += (noise_data / snr)
+        # scale the noise
+        noise_matrix = noise_evoked._data.reshape([len(evoked.ch_names),
+                                                   n_trials, -1])
+        signal_matrix = evoked._data.reshape([len(evoked.ch_names),
+                                              n_trials, -1])
 
-    # evoked.data *= 1e-12
+        mu = np.linalg.norm(signal_matrix, 'fro', axis=(1, 2))
+        mu /= (snr * np.sqrt(np.prod(signal_matrix.shape[1:])))
+
+        if noise_type == 'brownian':
+            noise_matrix = np.cumsum(noise_evoked.data * mu, axis=1)
+            signal_matrix += noise_matrix
+        else:
+            signal_matrix += (mu * noise_matrix)
+
+    evoked.data = np.reshape(signal_matrix * 1e-12, 1,
+                             len(evoked.ch_names), len(times))
 
     if filtering is not None:
         # filter all the data again

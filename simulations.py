@@ -40,7 +40,7 @@ def generate_signal(times, freq, n_trial=1, phase_lock=False):
 
 
 def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
-                        picks=None, loc_seed=None, snr=None,
+                        picks=None, loc_seed=None, snr=None, mu=None,
                         noise_type="white", return_matrix=True,
                         filtering=None, phase_lock=False):
     """Simulate evoked oscillatory data based on a given fwd model and dipole.
@@ -69,6 +69,9 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
     snr : None | float
         If not None, signal-to-noise ratio in dB for resulting signal (adding
         noise).
+    mu : None | float
+        To directly manipulate noise level (e.g. to keep constant across
+        conditions).
     noise_type : str
         Type of noise. Supported is at the moment: "white" and "brownian".
     return_matrix : bool
@@ -154,8 +157,10 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
         signal_matrix = evoked._data.reshape([len(evoked.ch_names),
                                               n_trials, -1]).transpose(1, 0, 2)
 
-        mu = np.linalg.norm(signal_matrix, 'fro', axis=(1, 2))
-        mu /= (snr * np.sqrt(len(evoked.ch_names) * (len(times) / n_trials)))
+        if mu is None:
+            mu = np.linalg.norm(signal_matrix, 'fro', axis=(1, 2))
+            mu /= (snr * np.sqrt(len(evoked.ch_names) *
+                                 (len(times) / n_trials)))
 
         if noise_type == 'brownian':
             noise_matrix = np.cumsum(mu[:, np.newaxis,
@@ -187,10 +192,10 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
         evoked.crop(0., evoked.times[int((times.shape[0] / n_trials) - 1)])
         evoked._data[:, :] = epochs.mean(axis=0)
 
-        return evoked, stc, epochs
+        return evoked, stc, epochs, mu
 
     else:
-        return evoked, stc
+        return evoked, stc, mu
 
 
 def make_pink_noise(noise_samples, n_changes, n_sensors):

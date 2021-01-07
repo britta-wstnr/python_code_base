@@ -85,7 +85,7 @@ def generate_data(label_names, n_trials, freqs, snr, pred_filter=True,
                                                  return_matrix=True,
                                                  filtering=filtering,
                                                  phase_lock=phase_lock,
-                                                 noise_type='brownian')
+                                                 noise_type='white')
         # data
         X.append(x_loc)
 

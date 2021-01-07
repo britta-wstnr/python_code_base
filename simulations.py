@@ -170,9 +170,8 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
         else:
             signal_matrix += (mu[:, np.newaxis, np.newaxis] * noise_matrix)
 
-    evoked.data = signal_matrix.reshape([len(evoked.ch_names),
-                                         int(n_trials *
-                                             (len(times) / n_trials))])
+    evoked.data = signal_matrix.transpose(1, 0, 2).reshape(
+        [len(evoked.ch_names), int(n_trials * (len(times) / n_trials))])
     evoked.data *= 1e-12
 
     if filtering is not None:

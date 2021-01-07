@@ -147,22 +147,28 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
             noise_data = noise_evoked.data
 
         # scale the noise
+        # shape: trials x sensor x time
         noise_matrix = noise_evoked._data.reshape([len(evoked.ch_names),
-                                                   n_trials, -1])
+                                                   n_trials, -1]).transpose(
+                                                       1, 0, 2)
         signal_matrix = evoked._data.reshape([len(evoked.ch_names),
-                                              n_trials, -1])
+                                              n_trials, -1]).transpose(1, 0, 2)
 
         mu = np.linalg.norm(signal_matrix, 'fro', axis=(1, 2))
-        mu /= (snr * np.sqrt(np.prod(signal_matrix.shape[1:])))
+        mu /= (snr * np.sqrt(len(evoked.ch_names) * (len(times) / n_trials)))
 
         if noise_type == 'brownian':
-            noise_matrix = np.cumsum(noise_evoked.data * mu, axis=1)
+            noise_matrix = np.cumsum(mu[:, np.newaxis,
+                                        np.newaxis] * noise_matrix,
+                                     axis=1)
             signal_matrix += noise_matrix
         else:
-            signal_matrix += (mu * noise_matrix)
+            signal_matrix += (mu[:, np.newaxis, np.newaxis] * noise_matrix)
 
-    evoked.data = np.reshape(signal_matrix * 1e-12, 1,
-                             len(evoked.ch_names), len(times))
+    evoked.data = signal_matrix.reshape([len(evoked.ch_names),
+                                         int(n_trials *
+                                             (len(times) / n_trials))])
+    evoked.data *= 1e-12
 
     if filtering is not None:
         # filter all the data again

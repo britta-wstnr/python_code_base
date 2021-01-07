@@ -59,3 +59,15 @@ def _check_type_evoked(evoked):
     elif type(evoked) is not np.ndarray:
         raise ValueError("Do not know type of evoked.")
     return evoked
+
+
+def estimate_snr(epochs, active, baseline):
+    """Compute effective SNR of the data."""
+    rms_signal = np.sqrt(np.mean(epochs._data[:, :,
+                                              active[0]:active[1]] ** 2, 2))
+    rms_noise = np.sqrt(np.mean(epochs._data[:, :,
+                                             baseline[0]:baseline[1]] ** 2, 2))
+
+    est_snrs = np.mean(rms_signal, 0) / np.mean(rms_noise, 0)
+
+    return 10 * np.log10(est_snrs)

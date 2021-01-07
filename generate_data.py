@@ -66,6 +66,7 @@ def generate_data(label_names, n_trials, freqs, snr, pred_filter=True,
     X = []
     sim_coords = []
     evokeds = []
+    mu = None
     for label, loc, freq in zip(labels, locations, freqs):
 
         if pred_filter is True:
@@ -77,15 +78,17 @@ def generate_data(label_names, n_trials, freqs, snr, pred_filter=True,
         else:
             filtering = None
 
-        evoked, stc, x_loc = simulate_evoked_osc(info, fwd_sim,
-                                                 n_trials=n_trials,
-                                                 freq=freq, label=[label],
-                                                 loc_in_label=loc, picks='mag',
-                                                 snr=snr, loc_seed=loc,
-                                                 return_matrix=True,
-                                                 filtering=filtering,
-                                                 phase_lock=phase_lock,
-                                                 noise_type='white')
+        evoked, stc, x_loc, mu = simulate_evoked_osc(info, fwd_sim,
+                                                     n_trials=n_trials,
+                                                     freq=freq, label=[label],
+                                                     loc_in_label=loc,
+                                                     picks='mag',
+                                                     snr=snr, mu=mu,
+                                                     loc_seed=loc,
+                                                     return_matrix=True,
+                                                     filtering=filtering,
+                                                     phase_lock=phase_lock,
+                                                     noise_type='white')
         # data
         X.append(x_loc)
 

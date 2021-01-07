@@ -111,15 +111,16 @@ def generate_data(label_names, n_trials, freqs, snr, pred_filter=True,
 
 def get_power_or_erp(X, data_obj, phase_lock, power_win, time_point=0.):
 
-    time_idx = data_obj[0].time_as_index(time_point)
-    power_idx = data_obj[0].time_as_index(power_win)
-
     if phase_lock is True:
+        time_idx = data_obj[0].time_as_index(time_point)
         # we choose one time_point
         time_idx = data_obj[0].time_as_index(time_point)
         X_out = X[:, :, time_idx[0]]
+
+        return X_out, time_idx
     else:
         # power
+        power_idx = data_obj[0].time_as_index(power_win)
         X_out = np.mean(X[:, :, power_idx[0]:power_idx[1]]**2, axis=2)
 
-    return X_out, time_idx
+        return X_out

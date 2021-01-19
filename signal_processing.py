@@ -70,4 +70,4 @@ def estimate_snr(epochs, active, baseline):
 
     est_snrs = np.mean(rms_signal, 0) / np.mean(rms_noise, 0)
 
-    return 10 * np.log10(est_snrs)
+    return 20 * np.log10(est_snrs)

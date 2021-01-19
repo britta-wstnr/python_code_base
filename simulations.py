@@ -151,9 +151,9 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
 
         # scale the noise
         # shape: trials x sensor x time
-        noise_matrix = noise_evoked._data.reshape([len(evoked.ch_names),
-                                                   n_trials, -1]).transpose(
-                                                       1, 0, 2)
+        noise_matrix = noise_data.reshape([len(evoked.ch_names),
+                                           n_trials, -1]).transpose(
+                                               1, 0, 2)
         signal_matrix = evoked._data.reshape([len(evoked.ch_names),
                                               n_trials, -1]).transpose(1, 0, 2)
 

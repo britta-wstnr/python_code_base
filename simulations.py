@@ -125,7 +125,7 @@ def simulate_evoked_osc(info, fwd, n_trials, freq, label, loc_in_label=None,
             filtering["hp_tw"] = "auto"
 
     if snr is not None:
-        snr = 10 ** (snr/10)  # convert dB to ratio
+        snr = 10 ** (snr/20)  # convert dB to ratio
         if noise_type == "white":
             noise_data = np.random.randn(*evoked.data.shape)
         elif noise_type == "brownian":
